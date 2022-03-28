@@ -7,22 +7,39 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   const [med, setMed] = useState([]);
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState(true);
+  const [err,seterr] = useState(false);
 
   const fetchmedical = async () => {
-    const { data } = await axios.get("https://dev.dashmed.in/sample-data");
-    console.log(data);
 
-    setMed(data.data);
+    try{
+      const { data } = await axios.get("https://dev.dashmed.in/sample-data");
+      console.log(data);
+      setMed(data.data);
+    }
+    catch(e){
+      console.log(e);
+      seterr(true);
+    }
+
+    
   };
 
   useEffect(() => {
     fetchmedical();
+
+    const timer = setTimeout(() => {
+      // console.log('This will run after 1 second!')
+      setShow(false);
+    }, 3000);
+
+    return () => clearTimeout(timer);
   },[]);
 
   function showToast() {
     setShow(true);
   }
+
 
   return (
     <div className="App">
@@ -44,10 +61,19 @@ function App() {
 			<div className="flex w-full">
 				<div className="text-lg p-4 w-1/3">Medicine Name</div>
 				<div className="text-lg p-4 w-1/3">Salt Name</div>
-				<div className="text-lg p-4 w-1/3">Manufacturer</div>
+
+
+				{/* <div className="text-lg p-4 w-1/3">Manufacturer</div> */}
+        <div className="text-lg p-4 w-1/3">Others</div>
 			</div>
 		</div>
 		<div className="bg-grey-light flex flex-col items-center justify-between overflow-y-scroll w-full" style={{height:590}}>
+
+      {
+        err && (
+          <div>Request failed with status code 404</div>
+        )
+      }
 {med.map((info,ind) => {
   return (
     <div
@@ -58,7 +84,15 @@ function App() {
 			<div className="flex w-full" onClick={showToast}>
 				<div className="p-4 w-1/3 text-purple-900 font-bold">{info.medName}</div>
 				<div className="p-4 w-1/3 text-purple-900">{info.saltName}</div>
-				<div className="p-4 w-1/3 text-purple-900">{info.manufacturer}</div>
+				{/* <div className="p-4 w-1/3 text-purple-900">{info.manufacturer}</div> */}
+        {
+        Object.keys(info).map(function(key) {
+    // console.log(key, info[key]);
+       return (
+         key!="medName" && key!="saltName" && (
+          <div className="p-4 w-1/3 text-purple-900">{key}:{info[key]}</div>))
+})
+}
 			</div>
       
 
